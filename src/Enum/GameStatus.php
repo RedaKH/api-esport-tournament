@@ -1,15 +1,13 @@
 <?php
+
 namespace App\Enum;
 
-enum TournamentStatus: string
-{
-    case DRAFT = 'draft';
-    case REGISTRATION = 'registration';
+enum GameStatus : string{
+
+    case SCHEDULED = 'scheduled';
     case IN_PROGRESS = 'in_progress';
     case COMPLETED = 'completed';
     case CANCELLED = 'cancelled';
-
-
 }
 
 ?>

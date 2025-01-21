@@ -9,9 +9,13 @@ use App\Entity\Payment;
 class StripeService {
 
     private StripeClient $stripe;
+    private string $secretKey;
+    private string $webhookSecret;
 
-    public function __construct( private string $stripeSecretKey){
-        $this->stripe = new StripeClient($stripeSecretKey);
+    public function __construct( string $secretKey, string $webhookSecret){
+        $this->secretKey = $secretKey;
+        $this->stripe = new StripeClient($secretKey);
+        $this->webhookSecret = $webhookSecret;
 
     }
 
@@ -21,7 +25,7 @@ class StripeService {
             'amount'=> (int)($payment->getAmount()*100), // Stripe utilise les centimes
             'currency'=> 'eur',
             'automatic_payment_methods' => [
-                'enabled' = true,
+                'enabled' => true,
 
             ],
             'metadata' => [
@@ -43,6 +47,11 @@ class StripeService {
         );
 
         //Gérer les différents résultats du paiement
+        match($event->type){
+            'payment_intent.succeeded'=> $this->handlePaymentIntentSucceeded($event->data->object),
+            'payment_intent.payment_failed'=> $this->handlePaymentIntentFailed($event->data->object),
+            default => null,
+        };
     } 
 
 

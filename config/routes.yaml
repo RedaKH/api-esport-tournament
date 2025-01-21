@@ -7,4 +7,7 @@ controllers:
 api_login_check:
    path: /api/login
 
+api_payment_controller:
+    resource: App\Controller\PaymentController
+    type: attribute
    

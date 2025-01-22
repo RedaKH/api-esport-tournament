@@ -5,7 +5,7 @@ namespace App\Enum;
  {
     case ADMIN = 'ADMIN';
     case ORGANIZER = 'ORGANIZER';
-    case TEAM_MANAGER = 'ROLE_TEAM_MANAGER';
+    case MANAGER = 'MANAGER';
     case PLAYER = 'ROLE_PLAYER';
     case SPONSOR = 'ROLE_SPONSOR';
  }

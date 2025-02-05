@@ -40,4 +40,23 @@ class TournamentRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+public function findByYear(int $year)
+   {
+     return $this->createQueryBuilder('t')
+     ->where('YEAR(t.startDate) = :year')
+     ->setParameter('year',$year)
+     ->getQuery()
+     ->getResult();
+   }
+
+   public function findByTeam(Team $team)
+   {
+     return $this->createQueryBuilder('t')
+     ->innerJoin('t.teams','team')
+     ->where('team = :team')
+     ->setParameter('team',$team)
+     ->getQuery()
+     ->getResult();
+   }
 }

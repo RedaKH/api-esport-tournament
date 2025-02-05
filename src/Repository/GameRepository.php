@@ -40,4 +40,23 @@ class GameRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+   public function findByTeamAndTournament(Team $team, Tournament $tournament)
+   {
+     return $this->createQueryBuilder('m')
+     ->where('m.teamA = :team OR m.teamB = :team')
+     ->andWhere('m.tournament = :tournament')
+     ->setParameter('team',$team)
+     ->setParameter('tournament',$tournament)
+     ->getQuery()
+     ->getResult();
+   }
+   public function findByTournament(Tournament $tournament)
+   {
+     return $this->createQueryBuilder('m')
+     ->Where('m.tournament = :tournament')
+     ->setParameter('tournament',$tournament)
+     ->getQuery()
+     ->getResult();
+   }
 }

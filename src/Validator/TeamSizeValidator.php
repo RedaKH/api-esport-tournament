@@ -10,11 +10,11 @@ use Symfony\Component\Validator\ConstraintValidator;
 
 class TeamSizeValidator extends ConstraintValidator
 {
-    public function validate($value, Constraint $constraint){
+    public function validate($value, Constraint $constraint): void{
         if (!$value instanceof Team) {
             return;
         }
-    }
+    
 
     $playersCount = $value->getPlayers->count();
     if ($playersCount < $constraint->min || $playersCount > $constraint->max) {
@@ -30,6 +30,7 @@ class TeamSizeValidator extends ConstraintValidator
         ->addViolation();
         # code...
     }
+}
 }
 
 

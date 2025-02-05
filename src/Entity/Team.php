@@ -69,12 +69,19 @@ class Team
     #[ORM\OneToMany(targetEntity: SponsorshipContract::class, mappedBy: 'Team')]
     private Collection $sponsorshipContracts;
 
+    /**
+     * @var Collection<int, Ranking>
+     */
+    #[ORM\OneToMany(targetEntity: Ranking::class, mappedBy: 'Team')]
+    private Collection $rankings;
+
     public function __construct()
     {
         $this->manager = new ArrayCollection();
         $this->tournaments = new ArrayCollection();
         $this->games = new ArrayCollection();
         $this->sponsorshipContracts = new ArrayCollection();
+        $this->rankings = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -223,6 +230,36 @@ class Team
             // set the owning side to null (unless already changed)
             if ($sponsorshipContract->getTeam() === $this) {
                 $sponsorshipContract->setTeam(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ranking>
+     */
+    public function getRankings(): Collection
+    {
+        return $this->rankings;
+    }
+
+    public function addRanking(Ranking $ranking): static
+    {
+        if (!$this->rankings->contains($ranking)) {
+            $this->rankings->add($ranking);
+            $ranking->setTeam($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRanking(Ranking $ranking): static
+    {
+        if ($this->rankings->removeElement($ranking)) {
+            // set the owning side to null (unless already changed)
+            if ($ranking->getTeam() === $this) {
+                $ranking->setTeam(null);
             }
         }
 

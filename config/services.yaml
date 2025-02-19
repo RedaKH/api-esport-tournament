@@ -26,3 +26,8 @@ services:
         arguments:
             $secretKey: '%env(STRIPE_SECRET_KEY)%'
             $webhookSecret: '%env(STRIPE_WEBHOOK_SECRET)%'
+
+    App\State\TournamentProcessor: 
+        arguments: 
+            $persistProcessor: '@api_platform.doctrine.orm.state.persist_processor'
+        tags: ['api_platform.state_processor'] 

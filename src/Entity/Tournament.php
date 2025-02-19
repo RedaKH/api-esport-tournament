@@ -17,13 +17,14 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Operations;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
-
+use App\State\TournamentProcessor;
 
 #[ORM\Entity(repositoryClass: TournamentRepository::class)]
 #[ApiResource(
     operations: [
         new GetCollection(security: "is_granted('ROLE_ADMIN')"),
-        new Post(security: "is_granted('PUBLIC_ACCESS')"),
+        new Post(security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_ORGANIZER')",
+         processor: TournamentProcessor::class),
         new Get(security: "is_granted('ROLE_USER') and object == user"),
         new Put(security: "is_granted('ROLE_ORGANIZER') and object.getOrganizer() == user"),
         new Patch(security: "is_granted('ROLE_ORGANIZER') and object.getOrganizer() == user")
@@ -36,51 +37,55 @@ class Tournament
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['tournament_read','tournament_write'])]
+    #[Groups(['tournament:read','tournament:write'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['tournament_read'])]
-
+    #[Groups(['tournament:read','tournament:write'])]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['tournament_read','tournament_write'])]
+    #[Assert\NotBlank]
+
+    #[Groups(['tournament:read','tournament:write'])]
 
     private ?string $game = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['tournament_read','tournament_write'])]
+    #[Groups(['tournament:read','tournament:write'])]
+    #[Assert\NotBlank]
     private ?\DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Groups(['tournament_read','tournament_write'])]
+    #[Groups(['tournament:read','tournament:write'])]
+    #[Assert\NotBlank]
     private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column]
-    #[Groups(['tournament_read','tournament_write'])]
+    #[Groups(['tournament:read','tournament:write'])]
     private ?float $prizePool = 0;
 
     #[ORM\Column]
-    #[Groups(['tournament_read','tournament_write'])]
+    #[Groups(['tournament:read','tournament:write'])]
     private ?float $registrationFee = 0;
 
 
 
     #[ORM\ManyToOne(inversedBy: 'tournaments')]
-    #[Groups(['tournament_read'])]
+    #[Groups(['tournament:read'])]
     private ?User $organizer = null;
 
     /**
      * @var Collection<int, Team>
      */
     #[ORM\ManyToMany(targetEntity: Team::class, inversedBy: 'tournaments')]
-    #[Groups(['tournament_read'])]
+    #[Groups(['tournament:read'])]
 
     private Collection $teams;
 
     #[ORM\Column(enumType: TournamentStatus::class)]
-    private ?TournamentStatus $status = null;
+    private ?TournamentStatus $status = TournamentStatus::REGISTRATION;
 
     /**
      * @var Collection<int, Game>

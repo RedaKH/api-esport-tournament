@@ -14,15 +14,19 @@ use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Operations;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+use App\State\TeamProcessor;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
 #[ApiResource(
     operations: [
         new GetCollection(security: "is_granted('ROLE_USER')"),
-        new Post(security: "is_granted('ROLE_TEAM_MANAGER')"),
-        new Get(security: "is_granted('ROLE_USER')"),
-        new Put(security: "is_granted('ROLE_TEAM_MANAGER') and object.getManager() == user"),
-        new Patch(security: "is_granted('ROLE_TEAM_MANAGER') and object.getManager() == user")
+        new Post(security: "is_granted('ROLE_MANAGER')",
+                 processor:TeamProcessor::class),
+        new Get(security: "is_granted('IS_AUTHENTICATED_FULLY')"),
+        new Put(security: "is_granted('ROLE_MANAGER') and object.getManager() == user"),
+        new Patch(security: "is_granted('ROLE_MANAGER') and object.getManager() == user")
     ],
     normalizationContext: ['groups' => ['team:read']],
     denormalizationContext: ['groups' => ['team:write']]
@@ -36,6 +40,7 @@ class Team
 
     #[ORM\Column(length: 255)]
     #[Groups(['team:read','team:write'])]
+    #[Assert\NotBlank]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -43,12 +48,14 @@ class Team
     private ?string $logo = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['team:read','team:write'])]
     private ?string $description = null;
 
     /**
      * @var Collection<int, User>
      */
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'teams')]
+    #[Groups(['team:read', 'team:write'])]
     private Collection $manager;
 
     /**

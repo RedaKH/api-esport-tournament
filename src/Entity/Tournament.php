@@ -25,8 +25,8 @@ use App\State\TournamentProcessor;
         new GetCollection(security: "is_granted('ROLE_ADMIN')"),
         new Post(security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_ORGANIZER')",
          processor: TournamentProcessor::class),
-        new Get(security: "is_granted('ROLE_USER') and object == user"),
-        new Put(security: "is_granted('ROLE_ORGANIZER') and object.getOrganizer() == user"),
+         new Get(security: "is_granted('IS_AUTHENTICATED_FULLY')"),
+         new Put(security: "is_granted('ROLE_ORGANIZER') and object.getOrganizer() == user"),
         new Patch(security: "is_granted('ROLE_ORGANIZER') and object.getOrganizer() == user")
     ],
     normalizationContext: ['groups' => ['tournament:read']],

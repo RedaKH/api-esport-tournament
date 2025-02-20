@@ -41,14 +41,14 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-         - { path: ^/api/login, roles: PUBLIC_ACCESS }
-         - { path: ^/api/docs, roles: PUBLIC_ACCESS   }
-         - { path: ^/api/users, roles: PUBLIC_ACCESS,  methods: [POST]}
-         - { path: ^/api, roles: PUBLIC_ACCESS}
-         - { path: ^/api/sponsors, roles: IS_AUTHENTICATED_FULLY}
-         - { path: ^/api/teams, roles: IS_AUTHENTICATED_FULLY}
-         - { path: ^/api/tournaments, roles: IS_AUTHENTICATED_FULLY}
-         - { path: ^/api/payments, roles: IS_AUTHENTICATED_FULLY}
+    - { path: ^/api/login, roles: PUBLIC_ACCESS }
+    - { path: ^/api/docs, roles: PUBLIC_ACCESS }
+    - { path: ^/api/users, roles: PUBLIC_ACCESS, methods: [POST]}
+    - { path: ^/api/sponsors, roles: IS_AUTHENTICATED_FULLY}
+    - { path: ^/api/teams, roles: IS_AUTHENTICATED_FULLY}
+    - { path: ^/api/tournaments, roles: IS_AUTHENTICATED_FULLY}
+    - { path: ^/api/payments, roles: IS_AUTHENTICATED_FULLY}
+    - { path: ^/api, roles: IS_AUTHENTICATED_FULLY}  # Déplacé à la fin
 
 
 

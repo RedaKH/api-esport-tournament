@@ -31,3 +31,8 @@ services:
         arguments: 
             $persistProcessor: '@api_platform.doctrine.orm.state.persist_processor'
         tags: ['api_platform.state_processor'] 
+
+    App\State\TeamProcessor:
+        arguments:
+            $persistProcessor: '@api_platform.doctrine.orm.state.persist_processor'
+        tags: ['api_platform.state_processor']    

@@ -31,6 +31,9 @@ use App\State\TeamProcessor;
     normalizationContext: ['groups' => ['team:read']],
     denormalizationContext: ['groups' => ['team:write']]
 )]
+#[ORM\InheritanceType('SINGLE_TABLE')]
+#[ORM\DiscriminatorColumn(name:'type', type:'string')]
+#[ORM\DiscriminatorMap(['user'=>User::class,'player'=>Player::class])]
 class Team
 {
     #[ORM\Id]
@@ -62,6 +65,7 @@ class Team
      * @var Collection<int, Tournament>
      */
     #[ORM\ManyToMany(targetEntity: Tournament::class, mappedBy: 'teams')]
+
     private Collection $tournaments;
 
     /**
@@ -82,6 +86,13 @@ class Team
     #[ORM\OneToMany(targetEntity: Ranking::class, mappedBy: 'Team')]
     private Collection $rankings;
 
+    /**
+     * @var Collection<int, Player>
+     */
+    #[ORM\ManyToMany(targetEntity: Player::class, mappedBy: 'teams')]
+    #[Groups(['team:read','team:write'])]
+    private Collection $players;
+
     public function __construct()
     {
         $this->manager = new ArrayCollection();
@@ -89,6 +100,7 @@ class Team
         $this->games = new ArrayCollection();
         $this->sponsorshipContracts = new ArrayCollection();
         $this->rankings = new ArrayCollection();
+        $this->players = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -268,6 +280,33 @@ class Team
             if ($ranking->getTeam() === $this) {
                 $ranking->setTeam(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Player>
+     */
+    public function getPlayers(): Collection
+    {
+        return $this->players;
+    }
+
+    public function addPlayer(Player $player): static
+    {
+        if (!$this->players->contains($player)) {
+            $this->players->add($player);
+            $player->addTeam($this);
+        }
+
+        return $this;
+    }
+
+    public function removePlayer(Player $player): static
+    {
+        if ($this->players->removeElement($player)) {
+            $player->removeTeam($this);
         }
 
         return $this;

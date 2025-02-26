@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use App\Entity\User;
+use App\Entity\Player;
 use App\Entity\Tournament;
 use App\Entity\SponsorshipContract;
 use App\Entity\Payment;
@@ -68,6 +69,12 @@ class AppFixtures extends Fixture
             $user->setPseudo(explode('@',$userData['email'])[0]);
             $user->setPassword($this->passwordHasher->hashPassword($user,'test'));
             $user->setRoles(array_map(fn($role)=>$role->value,$userData['roles']));
+
+            $reflection = new \ReflectionObject($user);
+            $property = $reflection->getProperty('type');
+            $property->setAccessible(true);
+            $property->setValue($user,'user');
+
             $manager->persist($user);
             $users[] = $user;
         }
@@ -81,7 +88,8 @@ class AppFixtures extends Fixture
 
         $teamData = [
             ['name'=>'Dragon Risings','manager'=>$users[2]],
-            ['name'=>'Fnatic','manager'=>$users[3]]
+            ['name'=>'Fnatic','manager'=>$users[3]],
+            
 
 
         ];
@@ -205,6 +213,49 @@ class AppFixtures extends Fixture
             $manager->persist($contract);
 
         }
+    }
+
+    private function createPlayers(ObjectManager $manager): array
+    {
+        $players = [];
+
+        $playerData = [
+            //Joueur de LoL
+            ['email'=>'lol_player1@esport.com','pseudo'=>'LoLPro1','position'=>'Top Lane'],
+            ['email'=>'lol_player2@esport.com','pseudo'=>'LoLPro2','position'=>'Jungle'],
+            ['email'=>'lol_player3@esport.com','pseudo'=>'LoLPro3','position'=>'Mid Lane'],
+            //Joueur de Counter Strike
+            ['email'=>'csgo_player1@esport.com','pseudo'=>'CSPro1','position'=>'Entry Fragger'],
+            ['email'=>'csgo_player2@esport.com','pseudo'=>'CSPro2','position'=>'AWPer'],
+            ['email'=>'csgo_player3@esport.com','pseudo'=>'CSPro3','position'=>'IGL'],
+
+            //Joueur de VS fighting
+
+            ['email'=>'sf_player@esport.com','pseudo'=>'SFPro1','position'=>'Ryu Main'],
+            ['email'=>'mk_player@esport.com','pseudo'=>'MKPro1','position'=>'Scorpion Main'],
+            ['email'=>'ssb_player1@esport.com','pseudo'=>'SsbPro1','position'=>'Sora Main'],
+            ['email'=>'tekken_player1@esport.com','pseudo'=>'Tekken_Pro1','position'=>'Bryan Fury Main'],
+
+
+        ];
+        foreach ($playerData as $data) {
+            $player = new Player();
+           $player->setEmail($data['email']);
+           $player->setPosition($data['position']);
+           $player->setPseudo($data['pseudo']);
+           $player->setPassword($this->passwordHasher->hashPassword($player,'test'));
+           $reflection = new \ReflectionObject($player);
+            $property = $reflection->getProperty('type');
+            $property->setAccessible(true);
+            $property->setValue($player,'player');
+            
+           $manager->persist($player);
+           $players[] = $player;
+
+
+            # code...
+        }
+        return $players;
     }
 
 

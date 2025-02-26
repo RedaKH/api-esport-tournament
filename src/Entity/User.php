@@ -29,6 +29,9 @@ use App\Enum\UserRole;
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']]
 )]
+#[ORM\InheritanceType('JOINED')]
+#[ORM\DiscriminatorColumn(name:'type', type:'string')]
+#[ORM\DiscriminatorMap(['user'=>User::class,'player'=>Player::class])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -39,19 +42,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    #[Groups(['user:read','user:write'])]
+    #[Groups(['player:read','player:write','user:read','user:write'])]
     private ?string $email = null;
 
     #[ORM\Column]
     private array $roles = [];
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:write'])]
+    #[Groups(['player:read','player:write','user:write'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    #[Groups(['user:read','user:write'])]
+    #[Groups(['player:read','player:write','user:read','user:write'])]
     private ?string $pseudo = null;
 
     #[ORM\Column(length: 255, nullable: true)]

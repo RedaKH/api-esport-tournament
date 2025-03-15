@@ -45,12 +45,12 @@ class Game
     #[Groups(['match:read','match:write'])]
     private ?GameStatus $status = GameStatus::SCHEDULED;
 
-    #[ORM\ManyToOne(inversedBy: 'games')]
+    #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'gamesAsTeamA')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['match:read','match:write'])]
     private ?Team $teamA = null;
 
-    #[ORM\ManyToOne(inversedBy: 'games')]
+    #[ORM\ManyToOne(targetEntity: Team::class, inversedBy: 'gamesAsTeamB')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['match:read','match:write'])]
     private ?Team $teamB = null;

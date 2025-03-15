@@ -31,9 +31,6 @@ use App\State\TeamProcessor;
     normalizationContext: ['groups' => ['team:read']],
     denormalizationContext: ['groups' => ['team:write']]
 )]
-#[ORM\InheritanceType('SINGLE_TABLE')]
-#[ORM\DiscriminatorColumn(name:'type', type:'string')]
-#[ORM\DiscriminatorMap(['user'=>User::class,'player'=>Player::class])]
 class Team
 {
     #[ORM\Id]
@@ -72,7 +69,13 @@ class Team
      * @var Collection<int, Game>
      */
     #[ORM\OneToMany(targetEntity: Game::class, mappedBy: 'teamA')]
-    private Collection $games;
+    private Collection $gamesAsTeamA;
+
+    /**
+     * @var Collection<int, Game>
+     */
+    #[ORM\OneToMany(targetEntity: Game::class, mappedBy: 'teamB')]
+    private Collection $gamesAsTeamB;
 
     /**
      * @var Collection<int, SponsorshipContract>
@@ -89,15 +92,15 @@ class Team
     /**
      * @var Collection<int, Player>
      */
-    #[ORM\ManyToMany(targetEntity: Player::class, mappedBy: 'teams')]
-    #[Groups(['team:read','team:write'])]
+    #[ORM\ManyToMany(targetEntity: Player::class)]
     private Collection $players;
 
     public function __construct()
     {
         $this->manager = new ArrayCollection();
         $this->tournaments = new ArrayCollection();
-        $this->games = new ArrayCollection();
+        $this->gamesAsTeamA = new ArrayCollection();
+        $this->gamesAsTeamB = new ArrayCollection();
         $this->sponsorshipContracts = new ArrayCollection();
         $this->rankings = new ArrayCollection();
         $this->players = new ArrayCollection();
@@ -198,27 +201,57 @@ class Team
     /**
      * @return Collection<int, Game>
      */
-    public function getGames(): Collection
+    public function getGamesAsTeamA(): Collection
     {
-        return $this->games;
+        return $this->gamesAsTeamA;
     }
 
-    public function addGame(Game $game): static
+    public function addGameAsTeamA(Game $game): static
     {
-        if (!$this->games->contains($game)) {
-            $this->games->add($game);
+        if (!$this->gamesAsTeamA->contains($game)) {
+            $this->gamesAsTeamA->add($game);
             $game->setTeamA($this);
         }
 
         return $this;
     }
 
-    public function removeGame(Game $game): static
+    public function removeGameAsTeamA(Game $game): static
     {
-        if ($this->games->removeElement($game)) {
+        if ($this->gamesAsTeamA->removeElement($game)) {
             // set the owning side to null (unless already changed)
             if ($game->getTeamA() === $this) {
                 $game->setTeamA(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Game>
+     */
+    public function getGamesAsTeamB(): Collection
+    {
+        return $this->gamesAsTeamB;
+    }
+
+    public function addGameAsTeamB(Game $game): static
+    {
+        if (!$this->gamesAsTeamB->contains($game)) {
+            $this->gamesAsTeamB->add($game);
+            $game->setTeamB($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGameAsTeamB(Game $game): static
+    {
+        if ($this->gamesAsTeamB->removeElement($game)) {
+            // set the owning side to null (unless already changed)
+            if ($game->getTeamB() === $this) {
+                $game->setTeamB(null);
             }
         }
 
@@ -297,7 +330,6 @@ class Team
     {
         if (!$this->players->contains($player)) {
             $this->players->add($player);
-            $player->addTeam($this);
         }
 
         return $this;
@@ -306,7 +338,6 @@ class Team
     public function removePlayer(Player $player): static
     {
         if ($this->players->removeElement($player)) {
-            $player->removeTeam($this);
         }
 
         return $this;

@@ -16,22 +16,20 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use App\Enum\UserRole;
+use App\State\UserProcessor;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ApiResource(
     operations: [
         new GetCollection(security: "is_granted('ROLE_ADMIN')"),
-        new Post(security: "is_granted('PUBLIC_ACCESS')"),
+        new Post(security: "is_granted('PUBLIC_ACCESS')", processor: \App\State\UserProcessor::class),
         new Get(security: "is_granted('ROLE_USER') and object == user"),
-        new Patch(security: "is_granted('ROLE_USER') and object == user")
+        new Patch(security: "is_granted('ROLE_USER') and object == user", processor: \App\State\UserProcessor::class)
     ],
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']]
 )]
-#[ORM\InheritanceType('JOINED')]
-#[ORM\DiscriminatorColumn(name:'type', type:'string')]
-#[ORM\DiscriminatorMap(['user'=>User::class,'player'=>Player::class])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -46,6 +44,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column]
+    #[Groups(['user:read','user:write'])]
+
     private array $roles = [];
 
     #[ORM\Column(length: 255)]

@@ -36,3 +36,13 @@ services:
         arguments:
             $persistProcessor: '@api_platform.doctrine.orm.state.persist_processor'
         tags: ['api_platform.state_processor']    
+
+    App\State\UserProcessor:
+        arguments:
+            $persistProcessor: '@api_platform.doctrine.orm.state.persist_processor'
+        tags: ['api_platform.state_processor']
+
+    # Suppression de l'enregistrement de l'écouteur d'événements
+    # App\EventListener\UserTypeListener:
+    #    tags:
+    #        - { name: 'doctrine.event_listener', event: 'prePersist' }

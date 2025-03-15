@@ -28,18 +28,24 @@ class AppFixtures extends Fixture
     {
         //création des utilisateurs
         $users = $this->createUsers($manager);
+        
+        //creation des joueurs
+        $players = $this->createPlayers($manager);
+        
         //création des équipes
         $teams = $this->createTeams($manager,$users);
+        
         //création des tournois
         $tournaments = $this->createTournaments($manager,$users,$teams);
+        
         //création des matchs
         $this->createGames($manager,$tournaments,$teams);
+        
         //création des sponsors
         $sponsors = $this->createSponsors($manager,$users);
 
-    //Creation des contrats de sponsorings
-    
-    $this->createSponsorshipContracts($manager,$sponsors,$teams,$tournaments);
+        //Creation des contrats de sponsorings
+        $this->createSponsorshipContracts($manager,$sponsors,$teams,$tournaments);
 
         $manager->flush();
     }
@@ -54,13 +60,6 @@ class AppFixtures extends Fixture
             ['email'=>'player1@esport.com','roles' =>[UserRole::PLAYER]],
             ['email'=>'player2@esport.com','roles' =>[UserRole::PLAYER]],
             ['email'=>'sponsor@esport.com','roles' =>[UserRole::SPONSOR]],
-
-
-
-
-
-
-
         ];
 
         foreach($roles as $userData){
@@ -70,17 +69,10 @@ class AppFixtures extends Fixture
             $user->setPassword($this->passwordHasher->hashPassword($user,'test'));
             $user->setRoles(array_map(fn($role)=>$role->value,$userData['roles']));
 
-            $reflection = new \ReflectionObject($user);
-            $property = $reflection->getProperty('type');
-            $property->setAccessible(true);
-            $property->setValue($user,'user');
-
             $manager->persist($user);
             $users[] = $user;
         }
         return $users;
-
-
     }
 
     private function createTeams(ObjectManager $manager,array $users): array {
@@ -228,32 +220,29 @@ class AppFixtures extends Fixture
             ['email'=>'csgo_player1@esport.com','pseudo'=>'CSPro1','position'=>'Entry Fragger'],
             ['email'=>'csgo_player2@esport.com','pseudo'=>'CSPro2','position'=>'AWPer'],
             ['email'=>'csgo_player3@esport.com','pseudo'=>'CSPro3','position'=>'IGL'],
-
             //Joueur de VS fighting
-
             ['email'=>'sf_player@esport.com','pseudo'=>'SFPro1','position'=>'Ryu Main'],
             ['email'=>'mk_player@esport.com','pseudo'=>'MKPro1','position'=>'Scorpion Main'],
             ['email'=>'ssb_player1@esport.com','pseudo'=>'SsbPro1','position'=>'Sora Main'],
             ['email'=>'tekken_player1@esport.com','pseudo'=>'Tekken_Pro1','position'=>'Bryan Fury Main'],
-
-
         ];
+        
         foreach ($playerData as $data) {
-            $player = new Player();
-           $player->setEmail($data['email']);
-           $player->setPosition($data['position']);
-           $player->setPseudo($data['pseudo']);
-           $player->setPassword($this->passwordHasher->hashPassword($player,'test'));
-           $reflection = new \ReflectionObject($player);
-            $property = $reflection->getProperty('type');
-            $property->setAccessible(true);
-            $property->setValue($player,'player');
+            // Créer d'abord un User
+            $user = new User();
+            $user->setEmail($data['email']);
+            $user->setPseudo($data['pseudo']);
+            $user->setPassword($this->passwordHasher->hashPassword($user,'test'));
+            $user->setRoles(['ROLE_PLAYER']);
+            $manager->persist($user);
             
-           $manager->persist($player);
-           $players[] = $player;
-
-
-            # code...
+            // Puis créer un Player associé à ce User
+            $player = new Player();
+            $player->setUser($user);
+            $player->setPosition($data['position']);
+            
+            $manager->persist($player);
+            $players[] = $player;
         }
         return $players;
     }

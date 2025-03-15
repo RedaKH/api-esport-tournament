@@ -14,26 +14,40 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext:['groups'=>['player:read']],
     denormalizationContext:['groups'=>['player:write']]
 )]
-#[ORM\InheritanceType('JOINED')]
-#[ORM\DiscriminatorColumn(name:'type', type:'string')]
-#[ORM\DiscriminatorMap(['user'=>User::class,'player'=>Player::class])]
-class Player extends User
+class Player
 {
-  
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
 
- 
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['player:read','player:write','team:read','team:write'])]
     private ?string $position = null;
 
- 
-
     public function __construct()
     {
-        parent::__construct();
-        $this->roles = ['ROLE_PLAYER'];
+        // Ne plus appeler parent::__construct()
+    }
 
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(User $user): static
+    {
+        $this->user = $user;
+        return $this;
     }
 
     public function getPosition(): ?string
@@ -48,5 +62,19 @@ class Player extends User
         return $this;
     }
 
-   
+    // Méthodes de délégation pour accéder aux propriétés de User
+    public function getEmail(): ?string
+    {
+        return $this->user ? $this->user->getEmail() : null;
+    }
+
+    public function getPseudo(): ?string
+    {
+        return $this->user ? $this->user->getPseudo() : null;
+    }
+
+    public function getRoles(): array
+    {
+        return $this->user ? $this->user->getRoles() : [];
+    }
 }

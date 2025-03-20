@@ -22,7 +22,7 @@ class Player
     private ?int $id = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', onDelete: 'CASCADE', nullable: false)]
     private ?User $user = null;
 
     #[ORM\Column(length: 255, nullable: true)]

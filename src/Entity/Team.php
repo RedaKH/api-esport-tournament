@@ -21,7 +21,7 @@ use App\State\TeamProcessor;
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
 #[ApiResource(
     operations: [
-        new GetCollection(security: "is_granted('ROLE_USER')"),
+        new GetCollection(security: "is_granted('PUBLIC_ACCESS')"),
         new Post(security: "is_granted('ROLE_MANAGER')",
                  processor:TeamProcessor::class),
         new Get(security: "is_granted('IS_AUTHENTICATED_FULLY')"),

@@ -18,14 +18,15 @@ use ApiPlatform\Metadata\Operations;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\State\TournamentProcessor;
+use ApiPlatform\Metadata\Delete;
 
 #[ORM\Entity(repositoryClass: TournamentRepository::class)]
 #[ApiResource(
     operations: [
-        new GetCollection(security: "is_granted('ROLE_ADMIN')"),
+        new GetCollection(),
         new Post(security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_ORGANIZER')",
          processor: TournamentProcessor::class),
-         new Get(security: "is_granted('IS_AUTHENTICATED_FULLY')"),
+         new Get(),
          new Put(security: "is_granted('ROLE_ORGANIZER') and object.getOrganizer() == user"),
         new Patch(security: "is_granted('ROLE_ORGANIZER') and object.getOrganizer() == user")
     ],

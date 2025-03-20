@@ -8,6 +8,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Delete;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use ApiPlatform\Metadata\ApiResource;
@@ -23,9 +24,11 @@ use App\State\UserProcessor;
 #[ApiResource(
     operations: [
         new GetCollection(security: "is_granted('ROLE_ADMIN')"),
-        new Post(security: "is_granted('PUBLIC_ACCESS')", processor: \App\State\UserProcessor::class),
-        new Get(security: "is_granted('ROLE_USER') and object == user"),
-        new Patch(security: "is_granted('ROLE_USER') and object == user", processor: \App\State\UserProcessor::class)
+        new Post(security: "is_granted('IS_AUTHENTICATED_ANONYMOUSLY')", processor: \App\State\UserProcessor::class),
+        new Get(security: "is_granted('ROLE_ADMIN') or (is_granted('IS_AUTHENTICATED_FULLY') and object == user)"),
+        new Patch(security: "is_granted('ROLE_ADMIN') or (is_granted('IS_AUTHENTICATED_FULLY') and object == user)", processor: \App\State\UserProcessor::class),
+        new Delete(security: "is_granted('ROLE_ADMIN')")
+
     ],
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']]
@@ -49,7 +52,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private array $roles = [];
 
     #[ORM\Column(length: 255)]
-    #[Groups(['player:read','player:write','user:write'])]
+    #[Groups(['user:write'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
@@ -64,31 +67,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Team>
      */
-    #[ORM\ManyToMany(targetEntity: Team::class, mappedBy: 'manager')]
+    #[ORM\ManyToMany(targetEntity: Team::class, mappedBy: 'manager', cascade: ['persist', 'remove'])]
     private Collection $teams;
 
     /**
      * @var Collection<int, Tournament>
      */
-    #[ORM\OneToMany(targetEntity: Tournament::class, mappedBy: 'organizer')]
+    #[ORM\OneToMany(targetEntity: Tournament::class, mappedBy: 'organizer', cascade: ['persist', 'remove'])]
     private Collection $tournaments;
 
     /**
      * @var Collection<int, Sponsor>
      */
-    #[ORM\OneToMany(targetEntity: Sponsor::class, mappedBy: 'user')]
+    #[ORM\OneToMany(targetEntity: Sponsor::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private Collection $sponsors;
 
     /**
      * @var Collection<int, Payment>
      */
-    #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'User')]
+    #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'User', cascade: ['persist', 'remove'])]
     private Collection $payments;
 
     /**
      * @var Collection<int, Notification>
      */
-    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'User')]
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'User', cascade: ['persist', 'remove'])]
     private Collection $notifications;
 
     public function __construct()
@@ -171,9 +174,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     public function eraseCredentials(): void
-    {
-        $this->password = null;
-    }
+    {   
+        
+     }
 
     /**
      * @return Collection<int, Team>
